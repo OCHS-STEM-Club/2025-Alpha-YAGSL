@@ -18,9 +18,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Drive.AbsoluteFieldDrive;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import java.io.File;
+import java.util.function.DoubleSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -30,6 +32,7 @@ import java.io.File;
 public class RobotContainer
 {
 
+  private static final Command absoluteFieldDrive = null;
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandXboxController driverXbox = new CommandXboxController(0);
   // The robot's subsystems and commands are defined here...
@@ -69,6 +72,13 @@ public class RobotContainer
   {
     // Configure the trigger bindings
     configureBindings();
+
+    AbsoluteFieldDrive absoluteFieldDrive = new AbsoluteFieldDrive(
+      drivebase, 
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftY()*OperatorConstants.TRANSLATION_Y_CONSTANT, OperatorConstants.LEFT_Y_DEADBAND), 
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftX()*OperatorConstants.TRANSLATION_X_CONSTANT, OperatorConstants.LEFT_X_DEADBAND), 
+      () -> MathUtil.applyDeadband(-driverXbox.getRightX()*OperatorConstants.ROTATION_CONSTANT, OperatorConstants.RIGHT_X_DEADBAND));
+
 
       Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
       () -> MathUtil.applyDeadband(driverXbox.getLeftY() * -1, OperatorConstants.LEFT_Y_DEADBAND),
@@ -115,8 +125,7 @@ public class RobotContainer
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
       drivebase.setDefaultCommand(
-         !RobotBase.isSimulation() ? driveFieldOrientedDirectAngle : driveFieldOrientedDirectAngleSim);
-    }
+        !RobotBase.isSimulation() ? absoluteFieldDrive : driveFieldOrientedDirectAngle);}
   }
 
   /**
