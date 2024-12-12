@@ -69,6 +69,16 @@ public class RobotContainer
   {
     // Configure the trigger bindings
     configureBindings();
+
+      Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
+      () -> MathUtil.applyDeadband(driverXbox.getLeftY() * -1, OperatorConstants.LEFT_Y_DEADBAND),
+      () -> MathUtil.applyDeadband(driverXbox.getLeftX() * -1, OperatorConstants.LEFT_X_DEADBAND),
+      () -> driverXbox.getRightX() * -1);
+
+    Command driveFieldOrientedDirectAngleSim = drivebase.simDriveCommand(
+      () -> MathUtil.applyDeadband(driverXbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
+      () -> MathUtil.applyDeadband(driverXbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
+      () -> driverXbox.getRawAxis(2));
   }
 
   /**
@@ -90,7 +100,7 @@ public class RobotContainer
       driverXbox.leftBumper().onTrue(Commands.none());
       driverXbox.rightBumper().onTrue(Commands.none());
       drivebase.setDefaultCommand(
-          !RobotBase.isSimulation() ? driveFieldOrientedAnglularVelocity : driveFieldOrientedDirectAngleSim);
+          !RobotBase.isSimulation() ? driveFieldOrientedAnglularVelocity : driveFieldOrientedDirectAngle);
     } else
     {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
@@ -105,7 +115,7 @@ public class RobotContainer
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
       drivebase.setDefaultCommand(
-          !RobotBase.isSimulation() ? driveFieldOrientedDirectAngle : driveFieldOrientedDirectAngleSim);
+         !RobotBase.isSimulation() ? driveFieldOrientedDirectAngle : driveFieldOrientedDirectAngleSim);
     }
   }
 
